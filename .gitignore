@@ -1,0 +1,60 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.so
+
+# Virtual Environment
+venv/
+env/
+ENV/
+.venv
+
+# Data (too large for git)
+*.csv
+*.json
+*.db
+*.sqlite
+data/raw/*
+data/processed/*.csv
+
+# Models (binary files)
+*.pt
+*.pth
+*.bin
+*.h5
+*.joblib
+model_checkpoints/
+checkpoints/
+
+# Logs & Temp
+*.log
+logs/
+*.tmp
+*.bak
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# LaTeX build files
+*.aux
+*.log
+*.out
+*.pdf
+
+# Environment
+.env
+*.key
+*.pem
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb
+
+# Testing
+.pytest_cache/
+.coverage
