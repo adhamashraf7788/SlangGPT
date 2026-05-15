@@ -13,7 +13,6 @@ from torch.utils.data import Dataset, DataLoader
 from transformers import (
     AutoTokenizer,
     AutoModel,
-    AutoModelForCausalLM,
     get_linear_schedule_with_warmup,
 )
 from torch.optim import AdamW
@@ -126,36 +125,6 @@ def evaluate(model, loader, device):
     return total_loss / len(loader), acc, all_preds, all_labels
 
 
-def zero_shot_evaluate(model_name: str, loader, device, tokenizer):
-    """Zero-shot baseline: uses raw vocab logits for yes/no tokens, no classifier head."""
-    zs_model = AutoModelForCausalLM.from_pretrained(model_name).to(device).eval()
-
-    # Arabic yes/no token ids
-    yes_id = tokenizer.convert_tokens_to_ids("نعم")
-    no_id  = tokenizer.convert_tokens_to_ids("لا")
-    print(f"Zero-shot token IDs → 'نعم': {yes_id}  |  'لا': {no_id}")
-
-    all_preds, all_labels = [], []
-
-    with torch.no_grad():
-        for batch in tqdm(loader, desc="Zero-shot eval"):
-            input_ids      = batch["input_ids"].to(device)
-            attention_mask = batch["attention_mask"].to(device)
-            labels         = batch["label"].to(device)
-
-            out      = zs_model(input_ids=input_ids, attention_mask=attention_mask)
-            # last real token position for each example
-            seq_len  = attention_mask.sum(dim=1) - 1
-            logits   = out.logits[torch.arange(out.logits.size(0)), seq_len]  # (B, vocab)
-
-            preds = (logits[:, yes_id] > logits[:, no_id]).long().cpu().tolist()
-            all_preds.extend(preds)
-            all_labels.extend(labels.cpu().tolist())
-
-    acc = accuracy_score(all_labels, all_preds)
-    return acc, all_preds, all_labels
-
-
 def train():
     set_seed(SEED)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -222,37 +191,11 @@ def train():
                 print("Early stopping triggered.")
                 break
 
-    # ── zero-shot baseline (AFTER training, using separate model) ─────────────
-    print("\n" + "="*45)
-    print("RUNNING ZERO-SHOT BASELINE")
-    print("="*45)
-    
-    zs_acc, zs_preds, zs_labels = zero_shot_evaluate(
-        DETECTION_BASE_MODEL, test_loader, device, tokenizer
-    )
-    print(f"Zero-shot test accuracy: {zs_acc:.4f}")
-    print(classification_report(zs_labels, zs_preds, target_names=["incorrect", "correct"]))
-
-    # ── fine-tuned evaluation (load best model) ───────────────────────────────
-    print("\n" + "="*45)
-    print("RUNNING FINE-TUNED EVALUATION")
-    print("="*45)
-    
+    # final evaluation on test set
     model.load_state_dict(torch.load(DET_SAVE_PATH / "best_model.pt"))
     test_loss, test_acc, preds, labels = evaluate(model, test_loader, device)
-    print(f"Fine-tuned test accuracy: {test_acc:.4f}")
+    print(f"\nTest accuracy: {test_acc:.4f}")
     print(classification_report(labels, preds, target_names=["incorrect", "correct"]))
-
-    # ── comparison summary ────────────────────────────────────────────────────
-    print("\n" + "="*45)
-    print("COMPARISON SUMMARY")
-    print("="*45)
-    print(f"{'Model':<30} {'Test Acc':>10}")
-    print("-"*45)
-    print(f"{'Zero-shot AraGPT-2':<30} {zs_acc:>10.4f}")
-    print(f"{'Fine-tuned AraGPT-2':<30} {test_acc:>10.4f}")
-    print(f"{'Gain':<30} {test_acc - zs_acc:>+10.4f}")
-    print("="*45)
 
 
 if __name__ == "__main__":

@@ -223,50 +223,5 @@ def train(resume_from: str = None):
     print("Training complete.")
 
 
-# ── zero-shot comparison ──────────────────────────────────────────────────────
-
-def zero_shot_compare(fine_tuned_path: str, test_phrases: list):
-    """Compare zero-shot vs fine-tuned generation side by side."""
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
-    # load zero-shot (base model, no fine-tuning)
-    zs_tok = AutoTokenizer.from_pretrained(GENERATION_BASE_MODEL)
-    if zs_tok.pad_token is None:
-        zs_tok.add_special_tokens({"pad_token": "<pad>"})
-    zs_mdl = AutoModelForCausalLM.from_pretrained(GENERATION_BASE_MODEL).to(device).eval()
-
-    # load fine-tuned
-    ft_tok = AutoTokenizer.from_pretrained(fine_tuned_path)
-    ft_mdl = AutoModelForCausalLM.from_pretrained(fine_tuned_path).to(device).eval()
-
-    def generate(model, tokenizer, phrase):
-        prompt  = GEN_PROMPT_TEMPLATE.format(slang=phrase)
-        enc     = tokenizer(prompt, return_tensors="pt").to(device)
-        with torch.no_grad():
-            out_ids = model.generate(
-                **enc, max_new_tokens=60,
-                temperature=0.7, top_k=50, top_p=0.92,
-                repetition_penalty=1.3, do_sample=True,
-                pad_token_id=tokenizer.pad_token_id
-            )
-        generated = tokenizer.decode(out_ids[0], skip_special_tokens=True)
-        return generated[len(prompt):].split("\n")[0].strip()
-
-    print(f"\n{'Input':<30} {'Zero-shot':<35} {'Fine-tuned':<35}")
-    print("-" * 100)
-    for phrase in test_phrases:
-        zs_out = generate(zs_mdl, zs_tok, phrase)
-        ft_out = generate(ft_mdl, ft_tok, phrase)
-        print(f"{phrase:<30} {zs_out[:33]:<35} {ft_out[:33]:<35}")
-
-
 if __name__ == "__main__":
     train()
-    zero_shot_compare(
-        fine_tuned_path=str(GEN_SAVE_PATH / "best"),
-        test_phrases=[
-            "يلا فين؟",
-            "أنا محتاج أتكلم معاكي",
-            "كنت فاكرك مش جاية",
-        ]
-    )
