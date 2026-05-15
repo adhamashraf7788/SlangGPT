@@ -184,9 +184,9 @@ def main(raw_csv: str, normalize: bool = False):
     print(f"  Split → train={len(train_df)}, dev={len(dev_df)}, test={len(test_df)}")
 
     # save generation splits (columns: egyptian_arabic, formal_arabic, mostly_english)
-    train_df.to_csv(PROCESSED_DIR / "train.csv", index=False, encoding="utf-8-sig")
-    dev_df.to_csv  (PROCESSED_DIR / "dev.csv",   index=False, encoding="utf-8-sig")
-    test_df.to_csv (PROCESSED_DIR / "test.csv",  index=False, encoding="utf-8-sig")
+    train_df.to_csv(PROCESSED_DIR / "generation_train.csv", index=False, encoding="utf-8-sig")
+    dev_df.to_csv  (PROCESSED_DIR / "generation_dev.csv",   index=False, encoding="utf-8-sig")
+    test_df.to_csv (PROCESSED_DIR / "generation_test.csv",  index=False, encoding="utf-8-sig")
     print("  Saved train/dev/test CSVs.")
 
     # save detection splits
