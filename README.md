@@ -1,4 +1,4 @@
-<div align="center">
+<!-- <div align="center"> -->
 
 # SlangGPT
 ### Egyptian Arabic → Modern Standard Arabic
