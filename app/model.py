@@ -50,11 +50,23 @@ def load_detection_model():
 
 
 def load_generation_model():
-    tokenizer = AutoTokenizer.from_pretrained(str(GEN_WEIGHTS_PATH))
-    model     = AutoModelForCausalLM.from_pretrained(str(GEN_WEIGHTS_PATH))
+    try:
+        tokenizer = AutoTokenizer.from_pretrained(
+            str(GEN_WEIGHTS_PATH),
+            use_fast=False
+        )
+    except (ValueError, OSError):
+        print("⚠ Generation tokenizer not found locally, loading from HuggingFace...")
+        tokenizer = AutoTokenizer.from_pretrained(
+            DETECTION_BASE_MODEL,
+            use_fast=False
+        )
+    if tokenizer.pad_token is None:
+        tokenizer.add_special_tokens({"pad_token": "<pad>"})
+
+    model = AutoModelForCausalLM.from_pretrained(str(GEN_WEIGHTS_PATH))
     model.to(device).eval()
     return model, tokenizer
-
 
 # ── inference ─────────────────────────────────────────────────────────────────
 def detect(slang: str, formal: str, model, tokenizer) -> dict:
