@@ -12,12 +12,12 @@ Built as an extension of the Stanford CS224N default project framework, adapted 
 
 ## Results
 
-| Task       | Model               | Metric            | Score                  |
-| ---------- | ------------------- | ----------------- | ---------------------- |
-| Detection  | Zero-shot AraGPT-2  | Accuracy          | 0.500                  |
-| Detection  | Fine-tuned AraGPT-2 | Accuracy          | **0.956**              |
-| Generation | Zero-shot AraGPT-2  | chrF / BLEU / PPL | 10.62 / 0.02 / 728,108 |
-| Generation | Fine-tuned AraGPT-2 | chrF / BLEU / PPL | **29.08 / 6.63 / —**   |
+| Task | Model | Metric | Score |
+|---|---|---|---|
+| Detection | Zero-shot AraGPT-2 | Accuracy | 0.500 |
+| Detection | Fine-tuned AraGPT-2 | Accuracy | **0.956** |
+| Generation | Zero-shot AraGPT-2 | chrF / BLEU / PPL | 10.62 / 0.02 / 728,108 |
+| Generation | Fine-tuned AraGPT-2 | chrF / BLEU / PPL | **29.08 / 6.63 / —** |
 
 Fine-tuning improves detection accuracy by **+45.6 points** and chrF by **+18.5 points** over zero-shot baselines.
 
@@ -30,14 +30,13 @@ Fine-tuning improves detection accuracy by **+45.6 points** and chrF by **+18.5 
 **Egyptian Arabic Slang ↔ Formal Arabic**  
 18,250 parallel sentence pairs mapping Egyptian Arabic dialect to Modern Standard Arabic (MSA).
 
-| Split       | Rows    |
-| ----------- | ------- |
+| Split | Rows |
+|---|---|
 | Train (80%) | ~14,600 |
-| Dev (10%)   | ~1,825  |
-| Test (10%)  | ~1,825  |
+| Dev (10%) | ~1,825 |
+| Test (10%) | ~1,825 |
 
 **Download:**
-
 - 🤗 Hugging Face: [AdhamAshraf/egyptian-2-arabic](https://huggingface.co/datasets/AdhamAshraf/egyptian-2-arabic)
 - 📦 Kaggle: [adhamashraf77/egyptian-2-arabic](https://www.kaggle.com/datasets/adhamashraf77/egyptian-2-arabic)
 
@@ -51,7 +50,6 @@ The original dataset paired Egyptian Arabic with English translations. This vers
 - Reformatted for NLP dialect-to-MSA tasks
 
 **Citation:**
-
 ```bibtex
 @dataset{egyptian_arabic_slang_formal_2026,
   author    = {AdhamAshraf},
@@ -154,11 +152,11 @@ Open `http://localhost:5000` — enter an Egyptian Arabic sentence to get the MS
 
 Open the notebooks in order on Google Colab:
 
-| Notebook                    | Purpose                           |
-| --------------------------- | --------------------------------- |
-| `01_preprocessing.ipynb`    | Download dataset, clean, split    |
+| Notebook | Purpose |
+|---|---|
+| `01_preprocessing.ipynb` | Download dataset, clean, split |
 | `02_train_generation.ipynb` | Fine-tune AraGPT-2 for generation |
-| `03_train_detection.ipynb`  | Fine-tune AraGPT-2 for detection  |
+| `03_train_detection.ipynb` | Fine-tune AraGPT-2 for detection |
 
 All notebooks mount Google Drive and save checkpoints automatically.
 
@@ -168,10 +166,10 @@ All notebooks mount Google Drive and save checkpoints automatically.
 
 Both models are based on **AraGPT-2** from [aubmindlab](https://huggingface.co/aubmindlab):
 
-| Task       | Base Model                  | Parameters |
-| ---------- | --------------------------- | ---------- |
-| Generation | `aubmindlab/aragpt2-medium` | ~355M      |
-| Detection  | `aubmindlab/aragpt2-base`   | ~135M      |
+| Task | Base Model | Parameters |
+|---|---|---|
+| Generation | `aubmindlab/aragpt2-medium` | ~355M |
+| Detection | `aubmindlab/aragpt2-base` | ~135M |
 
 **Generation** uses causal language modeling with prompt masking — only the formal Arabic target tokens contribute to the loss.  
 **Detection** uses the last-token hidden state of the GPT-2 backbone fed into a linear classifier head, following the cloze-style formulation from the Stanford CS224N paper.
@@ -199,10 +197,9 @@ Results are saved to `evaluation/plots/`.
 
 This project extends the approach from:
 
-> Hernandez & Naik, _Extending GPT-2 for Informal and Slang Aware Language Understanding_, Stanford CS224N, 2025.
+> Hernandez & Naik, *Extending GPT-2 for Informal and Slang Aware Language Understanding*, Stanford CS224N, 2025.
 
 Which itself builds on:
-
 - Radford et al., [GPT-2](https://openai.com/research/language-unsupervised), 2019
 - Sun et al., [Toward Informal Language Processing](https://arxiv.org/abs/2404.02323), 2024
 
