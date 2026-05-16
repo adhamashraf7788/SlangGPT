@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SlangGPT — العربية الذكية</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+</head>
+<body>
+
+  <div class="container">
+
+    <!-- ── Header ─────────────────────────────────────────────────────────── -->
+    <header>
+      <div class="header-ornament">❖ &nbsp; ن ظ ا م &nbsp; ❖</div>
+      <h1 class="site-title">SlangGPT</h1>
+      <p class="site-subtitle">العامية المصرية &nbsp;↔&nbsp; الفصحى بالذكاء الاصطناعي</p>
+      <div class="divider"><div class="divider-diamond"></div></div>
+    </header>
+
+    <!-- ── Stats ──────────────────────────────────────────────────────────── -->
+    <div class="stats">
+      <div class="stat-card">
+        <span class="stat-value">95.6%</span>
+        <div class="stat-label">دقة الكشف</div>
+      </div>
+      <div class="stat-card">
+        <span class="stat-value">29.1</span>
+        <div class="stat-label">نقاط chrF للترجمة</div>
+      </div>
+      <div class="stat-card">
+        <span class="stat-value">AraGPT-2</span>
+        <div class="stat-label">النموذج المستخدم</div>
+      </div>
+    </div>
+
+    <!-- ── Tabs ───────────────────────────────────────────────────────────── -->
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('detect', this)">
+        <span class="tab-icon">🔍</span>
+        كشف الترجمة
+      </button>
+      <button class="tab-btn" onclick="switchTab('generate', this)">
+        <span class="tab-icon">✨</span>
+        توليد الفصحى
+      </button>
+    </div>
+
+    <!-- ── Detection Panel ────────────────────────────────────────────────── -->
+    <div id="panel-detect" class="tab-panel active">
+      <div class="card">
+        <div class="card-title">
+          <div class="card-title-icon">🔍</div>
+          هل الترجمة صحيحة؟
+        </div>
+
+        <div class="field">
+          <label>النص العامي</label>
+          <textarea id="det-slang" placeholder="اكتب جملة بالعامية المصرية..." rows="3"></textarea>
+        </div>
+
+        <div class="field">
+          <label>الترجمة الفصيحة المقترحة</label>
+          <textarea id="det-formal" placeholder="اكتب الترجمة الفصيحة للتحقق منها..." rows="3"></textarea>
+        </div>
+
+        <button class="btn btn-primary" id="det-btn" onclick="runDetect()">
+          <span class="btn-text">تحقق من الترجمة</span>
+        </button>
+
+        <div class="result-box" id="det-result">
+          <div class="result-label" id="det-result-label"></div>
+          <div class="result-text" id="det-result-text"></div>
+          <div class="confidence-bar">
+            <div class="confidence-fill" id="det-conf-fill" style="width: 0%"></div>
+          </div>
+          <div class="confidence-text" id="det-conf-text"></div>
+        </div>
+      </div>
+
+      <!-- Examples -->
+      <div class="card">
+        <div class="card-title">
+          <div class="card-title-icon">💡</div>
+          أمثلة للتجربة
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+          <button class="example-btn"
+            onclick="fillDetect('إيه ده؟', 'ما هذا؟')"
+            style="background:rgba(201,168,76,0.06); border:1px solid var(--border); border-radius:8px; padding:14px 18px; color:var(--text-primary); cursor:pointer; text-align:right; font-family:'Cairo',sans-serif; font-size:14px; transition:all 0.2s; direction:rtl;">
+            <strong style="color:var(--gold)">عامية:</strong> إيه ده؟
+            &nbsp;|&nbsp;
+            <strong style="color:var(--teal)">فصحى:</strong> ما هذا؟
+            &nbsp;→&nbsp; <span style="color:var(--text-muted)">صحيحة ✓</span>
+          </button>
+          <button class="example-btn"
+            onclick="fillDetect('أنا تعبان', 'أنا سعيد')"
+            style="background:rgba(201,168,76,0.06); border:1px solid var(--border); border-radius:8px; padding:14px 18px; color:var(--text-primary); cursor:pointer; text-align:right; font-family:'Cairo',sans-serif; font-size:14px; transition:all 0.2s; direction:rtl;">
+            <strong style="color:var(--gold)">عامية:</strong> أنا تعبان
+            &nbsp;|&nbsp;
+            <strong style="color:var(--teal)">فصحى:</strong> أنا سعيد
+            &nbsp;→&nbsp; <span style="color:var(--text-muted)">غير صحيحة ✗</span>
+          </button>
+          <button class="example-btn"
+            onclick="fillDetect('روح البيت', 'اذهب إلى المنزل')"
+            style="background:rgba(201,168,76,0.06); border:1px solid var(--border); border-radius:8px; padding:14px 18px; color:var(--text-primary); cursor:pointer; text-align:right; font-family:'Cairo',sans-serif; font-size:14px; transition:all 0.2s; direction:rtl;">
+            <strong style="color:var(--gold)">عامية:</strong> روح البيت
+            &nbsp;|&nbsp;
+            <strong style="color:var(--teal)">فصحى:</strong> اذهب إلى المنزل
+            &nbsp;→&nbsp; <span style="color:var(--text-muted)">صحيحة ✓</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Generation Panel ───────────────────────────────────────────────── -->
+    <div id="panel-generate" class="tab-panel">
+      <div class="card">
+        <div class="card-title">
+          <div class="card-title-icon">✨</div>
+          ترجم العامية إلى الفصحى
+        </div>
+
+        <div class="field">
+          <label>النص العامي</label>
+          <textarea id="gen-slang" placeholder="اكتب جملة بالعامية المصرية..." rows="4"></textarea>
+        </div>
+
+        <button class="btn btn-teal" id="gen-btn" onclick="runGenerate()">
+          <span class="btn-text">ولّد الترجمة الفصيحة</span>
+        </button>
+
+        <div class="result-box" id="gen-result">
+          <div class="result-label">الترجمة الفصيحة</div>
+          <div class="result-text" id="gen-result-text"></div>
+        </div>
+      </div>
+
+      <!-- Examples -->
+      <div class="card">
+        <div class="card-title">
+          <div class="card-title-icon">💡</div>
+          جرّب هذه الجمل
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+          <button onclick="fillGenerate('يلا بينا')"
+            style="background:rgba(42,157,143,0.06); border:1px solid rgba(42,157,143,0.2); border-radius:8px; padding:14px 18px; color:var(--text-primary); cursor:pointer; text-align:right; font-family:'Cairo',sans-serif; font-size:15px; transition:all 0.2s; direction:rtl;">
+            يلا بينا
+          </button>
+          <button onclick="fillGenerate('أنا محتاج أتكلم معاكي')"
+            style="background:rgba(42,157,143,0.06); border:1px solid rgba(42,157,143,0.2); border-radius:8px; padding:14px 18px; color:var(--text-primary); cursor:pointer; text-align:right; font-family:'Cairo',sans-serif; font-size:15px; transition:all 0.2s; direction:rtl;">
+            أنا محتاج أتكلم معاكي
+          </button>
+          <button onclick="fillGenerate('ده كان يوم تمام')"
+            style="background:rgba(42,157,143,0.06); border:1px solid rgba(42,157,143,0.2); border-radius:8px; padding:14px 18px; color:var(--text-primary); cursor:pointer; text-align:right; font-family:'Cairo',sans-serif; font-size:15px; transition:all 0.2s; direction:rtl;">
+            ده كان يوم تمام
+          </button>
+          <button onclick="fillGenerate('مش عارف أعمل إيه')"
+            style="background:rgba(42,157,143,0.06); border:1px solid rgba(42,157,143,0.2); border-radius:8px; padding:14px 18px; color:var(--text-primary); cursor:pointer; text-align:right; font-family:'Cairo',sans-serif; font-size:15px; transition:all 0.2s; direction:rtl;">
+            مش عارف أعمل إيه
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Footer ──────────────────────────────────────────────────────────── -->
+    <footer>
+      <p>
+        بُني بـ <span>AraGPT-2</span> &nbsp;·&nbsp;
+        دقة الكشف <span>95.6%</span> &nbsp;·&nbsp;
+        مستوحى من <span>Stanford CS224N</span>
+      </p>
+    </footer>
+
+  </div><!-- /container -->
+
+  <!-- ── JavaScript ─────────────────────────────────────────────────────────── -->
+  <script>
+    // ── Tab switching ──────────────────────────────────────────────────────
+    function switchTab(tab, btn) {
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById('panel-' + tab).classList.add('active');
+      btn.classList.add('active');
+    }
+
+    // ── Fill helpers ───────────────────────────────────────────────────────
+    function fillDetect(slang, formal) {
+      document.getElementById('det-slang').value  = slang;
+      document.getElementById('det-formal').value = formal;
+      hideResult('det-result');
+    }
+
+    function fillGenerate(slang) {
+      document.getElementById('gen-slang').value = slang;
+      hideResult('gen-result');
+    }
+
+    function hideResult(id) {
+      const el = document.getElementById(id);
+      el.classList.remove('show', 'success', 'error', 'neutral');
+    }
+
+    // ── Detection ──────────────────────────────────────────────────────────
+    async function runDetect() {
+      const slang  = document.getElementById('det-slang').value.trim();
+      const formal = document.getElementById('det-formal').value.trim();
+      if (!slang || !formal) {
+        showError('det-result', 'يرجى إدخال النص العامي والفصيح');
+        return;
+      }
+
+      const btn = document.getElementById('det-btn');
+      setLoading(btn, true);
+
+      try {
+        const res  = await fetch('/detect', {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({ slang, formal }),
+        });
+        const data = await res.json();
+
+        if (data.error) { showError('det-result', data.error); return; }
+
+        const box   = document.getElementById('det-result');
+        const type  = data.correct ? 'success' : 'error';
+        const icon  = data.correct ? '✅' : '❌';
+        const conf  = data.confidence;
+
+        box.className = `result-box show ${type}`;
+        document.getElementById('det-result-label').textContent =
+          data.correct ? 'الترجمة صحيحة' : 'الترجمة غير صحيحة';
+        document.getElementById('det-result-text').textContent =
+          `${icon}  ${data.label}`;
+
+        const fill = document.getElementById('det-conf-fill');
+        fill.style.width = '0%';
+        setTimeout(() => { fill.style.width = conf + '%'; }, 50);
+        document.getElementById('det-conf-text').textContent =
+          `مستوى الثقة: ${conf}%`;
+
+      } catch (e) {
+        showError('det-result', 'حدث خطأ في الاتصال بالخادم');
+      } finally {
+        setLoading(btn, false);
+      }
+    }
+
+    // ── Generation ─────────────────────────────────────────────────────────
+    async function runGenerate() {
+      const slang = document.getElementById('gen-slang').value.trim();
+      if (!slang) {
+        showError('gen-result', 'يرجى إدخال النص العامي');
+        return;
+      }
+
+      const btn = document.getElementById('gen-btn');
+      setLoading(btn, true);
+
+      try {
+        const res  = await fetch('/generate', {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({ slang }),
+        });
+        const data = await res.json();
+
+        if (data.error) { showError('gen-result', data.error); return; }
+
+        const box = document.getElementById('gen-result');
+        box.className = 'result-box show neutral';
+        document.getElementById('gen-result-text').textContent = data.formal || '—';
+
+      } catch (e) {
+        showError('gen-result', 'حدث خطأ في الاتصال بالخادم');
+      } finally {
+        setLoading(btn, false);
+      }
+    }
+
+    // ── Helpers ────────────────────────────────────────────────────────────
+    function showError(boxId, msg) {
+      const box = document.getElementById(boxId);
+      box.className = 'result-box show error';
+      const label = box.querySelector('.result-label');
+      const text  = box.querySelector('.result-text');
+      if (label) label.textContent = 'خطأ';
+      if (text)  text.textContent  = msg;
+    }
+
+    function setLoading(btn, on) {
+      btn.classList.toggle('loading', on);
+      btn.disabled = on;
+    }
+
+    // ── Enter key support ──────────────────────────────────────────────────
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Enter' && e.ctrlKey) {
+        const active = document.querySelector('.tab-panel.active');
+        if (active.id === 'panel-detect')   runDetect();
+        if (active.id === 'panel-generate') runGenerate();
+      }
+    });
+
+    // ── Hover effect on example buttons ───────────────────────────────────
+    document.querySelectorAll('.example-btn, [onclick^="fillGenerate"]').forEach(btn => {
+      btn.addEventListener('mouseenter', () => {
+        btn.style.borderColor = 'var(--border-hover)';
+        btn.style.background  = 'rgba(201,168,76,0.10)';
+      });
+      btn.addEventListener('mouseleave', () => {
+        btn.style.borderColor = '';
+        btn.style.background  = '';
+      });
+    });
+  </script>
+
+</body>
+</html>
