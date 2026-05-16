@@ -1,6 +1,6 @@
 <div align="center">
 
-# <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Symbols/Egypt.png" alt="Egypt" width="35" height="35" /> SlangGPT
+# SlangGPT
 
 ### Egyptian Arabic ↔ Modern Standard Arabic
 
