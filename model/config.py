@@ -10,11 +10,15 @@ ROOT_DIR      = Path(__file__).parent.parent
 DATA_DIR      = ROOT_DIR / "data" / "processed"
 MODEL_DIR     = ROOT_DIR / "model" / "checkpoints"
 MODEL_DIR.mkdir(parents=True, exist_ok=True)
+WEIGHTS_DIR   = ROOT_DIR / "model" / "weights"      # ← ADD THIS
 
 # ── base model ───────────────────────────────────────────────────────────────
 # Arabic GPT-2 fine-tuned on Egyptian dialect; falls back gracefully to aubmindlab/aragpt2-base
 GENERATION_BASE_MODEL = "aubmindlab/aragpt2-medium"   # ~355M params, good Arabic coverage
 DETECTION_BASE_MODEL  = "aubmindlab/aragpt2-base"     # lighter for classification
+# ── saved weights (populated after training) ─────────────────────────────────
+GEN_WEIGHTS_PATH = WEIGHTS_DIR / "generation" / "best"   # written by train_generation.py
+DET_WEIGHTS_PATH = WEIGHTS_DIR / "detection"             # written by train_detection.py
 
 # ── generation ───────────────────────────────────────────────────────────────
 GEN_MAX_INPUT_LEN  = 64    # max tokens for the Egyptian slang prompt
