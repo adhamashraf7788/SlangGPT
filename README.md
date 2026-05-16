@@ -1,7 +1,8 @@
-<!-- <div align="center"> -->
-
+<div>
 # SlangGPT
+<div align="center">
 ### Egyptian Arabic → Modern Standard Arabic
+</div>
 
 **Fine-tuning AraGPT-2 for dialect-to-MSA generation and translation detection**
 
