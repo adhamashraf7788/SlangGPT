@@ -44,7 +44,7 @@ Thumbs.db
 *.aux
 *.log
 *.out
-*.pdf
+
 
 # Environment
 .env
