@@ -1,20 +1,16 @@
 <div align="center">
 
 # SlangGPT
-
-### Egyptian Arabic ↔ Modern Standard Arabic
+### Egyptian Arabic → Modern Standard Arabic
 
 **Fine-tuning AraGPT-2 for dialect-to-MSA generation and translation detection**
 
-[![Python](https://img.shields.io/badge/Python-3.10%2B-blue?logo=python&logoColor=white&style=for-the-badge)](https://www.python.org/)
-[![PyTorch](https://img.shields.io/badge/PyTorch-2.0%2B-EE4C2C?logo=pytorch&logoColor=white&style=for-the-badge)](https://pytorch.org/)
-[![Transformers](https://img.shields.io/badge/HuggingFace-Transformers-yellow?logo=huggingface&logoColor=white&style=for-the-badge)](https://huggingface.co/)
-[![Flask](https://img.shields.io/badge/Flask-2.3%2B-000000?logo=flask&logoColor=white&style=for-the-badge)](https://flask.palletsprojects.com/)
-
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge)](LICENSE)
-[![Dataset](https://img.shields.io/badge/🤗%20HuggingFace-Dataset-orange?style=for-the-badge)](https://huggingface.co/datasets/AdhamAshraf/egyptian-2-arabic)
-[![Kaggle](https://img.shields.io/badge/Kaggle-Dataset-20BEFF?logo=kaggle&logoColor=white&style=for-the-badge)](https://www.kaggle.com/datasets/adhamashraf77/egyptian-2-arabic)
-[![GitHub](https://img.shields.io/badge/GitHub-Code-181717?logo=github&logoColor=white&style=for-the-badge)](https://github.com/adhamashraf7788/SlangGPT)
+[![Python](https://img.shields.io/badge/Python-3.10%2B-blue?logo=python&logoColor=white)](https://www.python.org/)
+[![PyTorch](https://img.shields.io/badge/PyTorch-2.0%2B-EE4C2C?logo=pytorch&logoColor=white)](https://pytorch.org/)
+[![Transformers](https://img.shields.io/badge/HuggingFace-Transformers-yellow?logo=huggingface&logoColor=white)](https://huggingface.co/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Dataset](https://img.shields.io/badge/Dataset-HuggingFace-orange?logo=huggingface)](https://huggingface.co/datasets/AdhamAshraf/egyptian-2-arabic)
+[![Kaggle](https://img.shields.io/badge/Dataset-Kaggle-20BEFF?logo=kaggle&logoColor=white)](https://www.kaggle.com/datasets/adhamashraf77/egyptian-2-arabic)
 
 </div>
 
