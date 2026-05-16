@@ -1,271 +1,210 @@
-# SlangGPT 🗣️
-### Egyptian Arabic Slang ↔ Formal Arabic — Detection & Generation
+<p align="right" dir="rtl">
+  <strong>عامية: "يلا فين؟" &nbsp;→&nbsp; فصحى: "إلى أين تذهب؟"</strong>
+</p>
 
-Fine-tuning [AraGPT-2](https://huggingface.co/aubmindlab/aragpt2-base) to detect and generate
-Egyptian colloquial ↔ Modern Standard Arabic (MSA) translations,
-mirroring the Stanford CS224N slang-extension framework for Arabic.
+# SlangGPT — Egyptian Arabic → Modern Standard Arabic
+
+Fine-tuning **AraGPT-2** for two tasks:  
+**Generation** (Egyptian slang → formal MSA) and **Detection** (does this translation hold?).  
+Built as an extension of the Stanford CS224N default project framework, adapted for Arabic dialect NLP.
 
 ---
 
 ## Results
 
-### Detection (Egyptian Slang → Correct/Incorrect MSA Translation)
-
-| Model | Accuracy |
-|---|---|
-| Zero-shot AraGPT-2 | 0.500 |
-| **Fine-tuned AraGPT-2** | **0.956** |
-| Gain | **+0.456** |
-
-### Generation (Egyptian Slang → Formal Arabic)
-
-| Model | chrF ↑ | BLEU ↑ | PPL ↓ |
+| Task | Model | Metric | Score |
 |---|---|---|---|
-| Zero-shot AraGPT-2 | 10.62 | 0.02 | 728,108 |
-| **Fine-tuned AraGPT-2** | **29.08** | **6.63** | — |
-| Gain | **+18.46** | **+6.61** | — |
+| Detection | Zero-shot AraGPT-2 | Accuracy | 0.500 |
+| Detection | Fine-tuned AraGPT-2 | Accuracy | **0.956** |
+| Generation | Zero-shot AraGPT-2 | chrF / BLEU / PPL | 10.62 / 0.02 / 728,108 |
+| Generation | Fine-tuned AraGPT-2 | chrF / BLEU / PPL | **29.08 / 6.63 / —** |
 
-Fine-tuning improves detection accuracy from random-chance (0.500) to 0.956,
-and more than doubles chrF for generation — consistent with the Stanford paper's
-findings that task-specific supervision substantially improves informal language understanding.
+Fine-tuning improves detection accuracy by **+45.6 points** and chrF by **+18.5 points** over zero-shot baselines.
+
+![Results comparison](evaluation/plots/full_comparison.png)
+
+---
+
+## Dataset
+
+**Egyptian Arabic Slang ↔ Formal Arabic**  
+18,250 parallel sentence pairs mapping Egyptian Arabic dialect to Modern Standard Arabic (MSA).
+
+| Split | Rows |
+|---|---|
+| Train (80%) | ~14,600 |
+| Dev (10%) | ~1,825 |
+| Test (10%) | ~1,825 |
+
+**Download:**
+- 🤗 Hugging Face: [AdhamAshraf/egyptian-2-arabic](https://huggingface.co/datasets/AdhamAshraf/egyptian-2-arabic)
+- 📦 Kaggle: [adhamashraf77/egyptian-2-arabic](https://www.kaggle.com/datasets/adhamashraf77/egyptian-2-arabic)
+
+**Source & Derivation:**  
+Derived from [Abdalrahmankamel/Egyption_2_English](https://huggingface.co/datasets/Abdalrahmankamel/Egyption_2_English).  
+The original dataset paired Egyptian Arabic with English translations. This version repurposes the Egyptian Arabic content for Dialect → MSA conversion with the following modifications:
+
+- Removed English translation column
+- Added Modern Standard Arabic translations
+- Applied Arabic normalization and diacritic (tashkeel) removal
+- Reformatted for NLP dialect-to-MSA tasks
+
+**Citation:**
+```bibtex
+@dataset{egyptian_arabic_slang_formal_2026,
+  author    = {AdhamAshraf},
+  title     = {Egyptian Arabic Slang to Formal Arabic Dataset},
+  year      = {2026},
+  publisher = {Hugging Face},
+  url       = {https://huggingface.co/datasets/AdhamAshraf/egyptian-2-arabic}
+}
+
+@dataset{egyptian_english_original,
+  author    = {Abdalrahmankamel},
+  title     = {Egyption\_2\_English},
+  year      = {2024},
+  publisher = {Hugging Face},
+  url       = {https://huggingface.co/datasets/Abdalrahmankamel/Egyption_2_English}
+}
+```
 
 ---
 
 ## Project Structure
 
 ```
-SLANGGPT/
-├── app/
-│   ├── static/
-│   │   └── style.css
-│   ├── templates/
-│   │   └── index.html
-│   ├── app.py              # Flask API — /detect and /generate endpoints
-│   └── model.py            # Model loading + inference functions
+SlangGPT/
+├── app/                        # Flask web app
+│   ├── app.py                  # Web server
+│   ├── model.py                # Model loading & inference
+│   ├── templates/index.html    # Web UI
+│   └── static/style.css        # Styles
 ├── data/
-│   ├── processed/
-│   │   ├── detection_train.csv
-│   │   ├── detection_dev.csv
-│   │   ├── detection_test.csv
-│   │   ├── generation_train.csv
-│   │   ├── generation_dev.csv
-│   │   └── generation_test.csv
-│   ├── raw/
-│   │   └── NLP.csv
-│   └── prepare_data.py     # Builds detection & generation splits
+│   ├── prepare_data.py         # Preprocessing pipeline
+│   ├── raw/NLP.csv             # Raw dataset (git-ignored)
+│   └── processed/              # Train/dev/test splits (git-ignored)
 ├── evaluation/
-│   ├── plots/              # Saved charts and CSVs (auto-generated)
-│   ├── baseline.py         # Zero-shot baseline for both tasks
-│   ├── error_analysis.py   # Failure case inspection
-│   └── evaluate.py         # Fine-tuned vs baseline comparison
+│   ├── baseline.py             # Zero-shot baseline evaluation
+│   ├── evaluate.py             # Fine-tuned model evaluation + plots
+│   ├── error_analysis.py       # FP/FN error analysis
+│   └── plots/                  # Results CSVs and figures
 ├── model/
-│   ├── weights/
-│   │   ├── detection/      # best_model.pt + tokenizer files
-│   │   └── generation/     # pytorch_model.bin + tokenizer files
-│   ├── config.py
-│   ├── train_detection.py
-│   └── train_generation.py
-├── notebooks/
+│   ├── config.py               # Central config (paths + hyperparams)
+│   ├── train_generation.py     # Generation training script
+│   ├── train_detection.py      # Detection training script
+│   └── weights/                # Trained model weights (git-ignored)
+├── notebooks/                  # Colab training notebooks (git-ignored)
 │   ├── 01_preprocessing.ipynb
-│   ├── baseline.ipynb
-│   ├── evaluate.ipynb
-│   └── error_analysis.ipynb
-├── report/
-│   ├── sections/
-│   └── main.tex
-├── .gitignore
-├── README.md
-└── requirements.txt
+│   ├── 02_train_generation.ipynb
+│   └── 03_train_detection.ipynb
+├── scripts/
+│   └── download_weights.py     # Download weights from Google Drive
+└── report/
+    └── main.tex                # LaTeX report
 ```
 
 ---
 
-## Tasks
+## Quickstart
 
-### Detection
-Binary classification over (Egyptian slang, MSA candidate) pairs.
-Each example is converted to a cloze-style Arabic prompt:
-
-```
-عامية: "{slang}"
-فصحى: "{formal}"
-هل الترجمة صحيحة؟ أجب بـ "نعم" أو "لا":
-```
-
-The last-token hidden state of AraGPT-2 is passed through a linear head
-to produce binary logits (correct / incorrect). Negative examples are
-generated by mismatching slang-formal pairs from the same pool.
-
-The zero-shot baseline skips the linear head entirely — it compares raw
-vocabulary logits for the tokens `نعم` and `لا` to make a prediction.
-
-### Generation
-Conditional language modeling — given an Egyptian slang phrase, generate
-the MSA equivalent autoregressively:
-
-```
-عامية: "{slang}"
-فصحى:
-```
-
-AraGPT-2 is fine-tuned with cross-entropy loss applied only to the
-MSA continuation (prompt tokens masked with -100).
-At inference, decoding uses top-k + nucleus sampling with a repetition penalty.
-
----
-
-## Setup
+### 1. Clone & install
 
 ```bash
-git clone https://github.com/yourname/SlangGPT.git
+git clone https://github.com/adhamashraf7788/SlangGPT.git
 cd SlangGPT
 pip install -r requirements.txt
 ```
 
-Download model weights from Google Drive and place them in `model/weights/`:
+### 2. Download model weights
 
 ```bash
-pip install gdown
-
-# detection
-gdown --folder "YOUR_DETECTION_FOLDER_ID" -O model/weights/detection/
-
-# generation
-gdown --folder "YOUR_GENERATION_FOLDER_ID" -O model/weights/generation/
+python scripts/download_weights.py
 ```
+
+This places weights under `model/weights/detection/` and `model/weights/generation/best/`.
+
+### 3. Download & preprocess the dataset
+
+```python
+from datasets import load_dataset
+dataset = load_dataset("AdhamAshraf/egyptian-2-arabic", split="train")
+df = dataset.to_pandas()
+df.to_csv("data/raw/NLP.csv", index=False, encoding="utf-8-sig")
+```
+
+Then run:
+
+```bash
+python data/prepare_data.py --raw_csv data/raw/NLP.csv
+```
+
+### 4. Run the web app
+
+```bash
+python app/app.py
+```
+
+Open `http://localhost:5000` — enter an Egyptian Arabic sentence to get the MSA translation and a detection confidence score.
 
 ---
 
-## Training
+## Training (Colab)
 
-All training was done on Google Colab (T4 GPU).
-Checkpoints are saved to Google Drive and loaded into `model/weights/` for inference.
+Open the notebooks in order on Google Colab:
 
-### Detection
-```bash
-python model/train_detection.py
-```
-
-| Hyperparameter | Value |
+| Notebook | Purpose |
 |---|---|
-| Base model | aubmindlab/aragpt2-base |
-| Max seq len | 160 |
-| Batch size | 16 |
-| Epochs | 8 |
-| Learning rate | 2e-5 |
-| Weight decay | 0.01 |
-| Warmup ratio | 0.10 |
-| Early stopping patience | 3 |
-| Optimizer | AdamW |
+| `01_preprocessing.ipynb` | Download dataset, clean, split |
+| `02_train_generation.ipynb` | Fine-tune AraGPT-2 for generation |
+| `03_train_detection.ipynb` | Fine-tune AraGPT-2 for detection |
 
-### Generation
-```bash
-python model/train_generation.py
-```
+All notebooks mount Google Drive and save checkpoints automatically.
 
-| Hyperparameter | Value |
-|---|---|
-| Base model | aubmindlab/aragpt2-base |
-| Batch size | 4 |
-| Gradient accumulation | 4 (effective batch = 16) |
-| Learning rate | 2e-5 |
-| Weight decay | 0.01 |
-| Early stopping patience | 3 |
-| Optimizer | AdamW |
+---
+
+## Models
+
+Both models are based on **AraGPT-2** from [aubmindlab](https://huggingface.co/aubmindlab):
+
+| Task | Base Model | Parameters |
+|---|---|---|
+| Generation | `aubmindlab/aragpt2-medium` | ~355M |
+| Detection | `aubmindlab/aragpt2-base` | ~135M |
+
+**Generation** uses causal language modeling with prompt masking — only the formal Arabic target tokens contribute to the loss.  
+**Detection** uses the last-token hidden state of the GPT-2 backbone fed into a linear classifier head, following the cloze-style formulation from the Stanford CS224N paper.
 
 ---
 
 ## Evaluation
 
 ```bash
-# zero-shot baseline first
+# Zero-shot baseline
 python evaluation/baseline.py
 
-# fine-tuned vs baseline
+# Fine-tuned model evaluation
 python evaluation/evaluate.py
 
-# error analysis
+# Error analysis (FP/FN, worst/best examples)
 python evaluation/error_analysis.py
 ```
 
-Or run the equivalent notebooks in `notebooks/`.
-
-### Metrics
-- **Detection** — Accuracy, Precision, Recall, F1
-- **Generation** — chrF (character n-gram overlap), BLEU, Perplexity
+Results are saved to `evaluation/plots/`.
 
 ---
 
-## Approach
+## Related Work
 
-This project mirrors the Stanford CS224N slang extension setup
-(Hernandez & Naik, 2024) but applied to Egyptian Arabic rather than Gen-Z English:
+This project extends the approach from:
 
-| Stanford | This project |
-|---|---|
-| Gen-Z English slang | Egyptian Arabic colloquial |
-| GPT-2 (English) | AraGPT-2 (Arabic) |
-| "yes" / "no" vocab tokens | "نعم" / "لا" vocab tokens |
-| genz-slang-pairs-1k dataset | Egyptian↔MSA paired dataset |
-| chrF evaluation | chrF + BLEU + Perplexity |
+> Hernandez & Naik, *Extending GPT-2 for Informal and Slang Aware Language Understanding*, Stanford CS224N, 2025.
+
+Which itself builds on:
+- Radford et al., [GPT-2](https://openai.com/research/language-unsupervised), 2019
+- Sun et al., [Toward Informal Language Processing](https://arxiv.org/abs/2404.02323), 2024
 
 ---
 
-## API
+## License
 
-Start the Flask app:
-
-```bash
-python app/app.py
-```
-
-**POST /detect**
-```json
-{
-  "slang": "إيه ده",
-  "formal": "ما هذا"
-}
-```
-Returns:
-```json
-{
-  "label": "correct",
-  "confidence": 0.9412
-}
-```
-
-**POST /generate**
-```json
-{
-  "slang": "إيه ده"
-}
-```
-Returns:
-```json
-{
-  "formal": "ما هذا الشيء"
-}
-```
-
----
-
-## References
-
-1. Radford et al. — *Language Models are Unsupervised Multitask Learners*, OpenAI Blog, 2019
-2. Sun et al. — *Toward Informal Language Processing: Knowledge of Slang in Large Language Models*, arXiv:2404.02323, 2024
-3. Antoun et al. — *AraGPT2: Pre-Trained Transformer for Arabic Language Generation*, arXiv:2012.15520, 2020
-4. Hernandez & Naik — *Extending GPT-2 for Informal and Slang Aware Language Understanding*, Stanford CS224N, 2024
-
----
-
-## .gitignore note
-
-Model weights are excluded from git due to size.
-Add this to your `.gitignore`:
-
-```
-model/weights/
-evaluation/plots/
-*.pt
-*.bin
-```
+MIT
