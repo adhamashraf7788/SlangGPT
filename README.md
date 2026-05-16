@@ -310,19 +310,6 @@ Which builds on:
 
 ---
 
-## Authors
-
-| Name | Email |
-|---|---|
-| Abdelrahman Ahmed | abdelrahman.younes.2024@aiu.edu.eg |
-| Adham Ashraf | adham.helmy.2024@aiu.edu.eg |
-| Ahmed Fekry | ahmad.mansour.2024@aiu.edu.eg |
-
-**Supervisor:** Ashraf Elsayed
-**Course:** (AIE241) Natural Language Processing
-
----
-
 ## License
 
 This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details.
