@@ -9,8 +9,15 @@
 [![PyTorch](https://img.shields.io/badge/PyTorch-2.0%2B-EE4C2C?logo=pytorch&logoColor=white)](https://pytorch.org/)
 [![Transformers](https://img.shields.io/badge/HuggingFace-Transformers-yellow?logo=huggingface&logoColor=white)](https://huggingface.co/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![Dataset](https://img.shields.io/badge/Dataset-HuggingFace-orange?logo=huggingface)](https://huggingface.co/datasets/AdhamAshraf/egyptian-2-arabic)
-[![Kaggle](https://img.shields.io/badge/Dataset-Kaggle-20BEFF?logo=kaggle&logoColor=white)](https://www.kaggle.com/datasets/adhamashraf77/egyptian-2-arabic)
+
+---
+
+| Resource | Link |
+|---|---|
+| 🤗 Live Demo | [SlangGPT Space](https://huggingface.co/spaces/AdhamAshraf/SlangGPT) |
+| 📦 Training Dataset | [egyptian-2-arabic](https://huggingface.co/datasets/AdhamAshraf/egyptian-2-arabic) |
+| 💬 Feedback Dataset | [slanggpt-feedback-dataset](https://huggingface.co/datasets/AdhamAshraf/slanggpt-feedback-dataset) |
+| 📦 Kaggle | [egyptian-2-arabic](https://www.kaggle.com/datasets/adhamashraf77/egyptian-2-arabic) |
 
 </div>
 
@@ -50,9 +57,10 @@ Fine-tuning improves detection accuracy by **+45.6 points** and generation chrF 
 
 ---
 
-## Dataset
+## Datasets
 
-**Egyptian Arabic → Modern Standard Arabic** — 18,250 parallel sentence pairs
+### Training Dataset — egyptian-2-arabic
+18,250 parallel Egyptian Arabic / MSA sentence pairs used to train both the generation and detection models.
 
 | Split | Generation Pairs | Detection Examples |
 |---|---|---|
@@ -60,34 +68,69 @@ Fine-tuning improves detection accuracy by **+45.6 points** and generation chrF 
 | Dev (10%) | 1,825 | 3,650 |
 | Test (10%) | 1,825 | 3,650 |
 
-**Download:**
+🔗 [huggingface.co/datasets/AdhamAshraf/egyptian-2-arabic](https://huggingface.co/datasets/AdhamAshraf/egyptian-2-arabic)
 
-| Platform | Link |
-|---|---|
-| 🤗 Hugging Face | [AdhamAshraf/egyptian-2-arabic](https://huggingface.co/datasets/AdhamAshraf/egyptian-2-arabic) |
-| 📦 Kaggle | [adhamashraf77/egyptian-2-arabic](https://www.kaggle.com/datasets/adhamashraf77/egyptian-2-arabic) |
+```python
+from datasets import load_dataset
+dataset = load_dataset("AdhamAshraf/egyptian-2-arabic", split="train")
+df = dataset.to_pandas()
+```
 
 <details>
 <summary><b>Source & Derivation</b></summary>
 
-This dataset is derived from [Abdalrahmankamel/Egyption_2_English](https://huggingface.co/datasets/Abdalrahmankamel/Egyption_2_English). The original dataset paired Egyptian Arabic sentences with English translations. This version repurposes the Egyptian Arabic content for Dialect → MSA conversion with the following modifications:
-
+Derived from [Abdalrahmankamel/Egyption_2_English](https://huggingface.co/datasets/Abdalrahmankamel/Egyption_2_English). Modifications:
 - Removed English translation column
 - Added Modern Standard Arabic translations
-- Applied Arabic normalization and diacritic (tashkeel) removal
-- Reformatted for NLP dialect-to-MSA tasks
-
-```bibtex
-@dataset{ashraf2026,
-  author    = {Adham Ashraf},
-  title     = {Egyptian Arabic to Modern Standard Arabic Dataset},
-  year      = {2026},
-  publisher = {Hugging Face},
-  url       = {https://huggingface.co/datasets/AdhamAshraf/egyptian-2-arabic}
-}
-```
+- Applied Arabic normalization and diacritic removal
+- Reformatted for dialect-to-MSA tasks
 
 </details>
+
+---
+
+### Feedback Dataset — slanggpt-feedback-dataset
+Human feedback collected from the live Space. Users rate model translations and provide corrections, forming a growing dataset for future RLHF fine-tuning.
+
+| Field | Type | Description |
+|---|---|---|
+| `egyptian_arabic` | string | Original Egyptian Arabic input |
+| `generated_msa` | string | SlangGPT's generated translation |
+| `user_label` | string | `correct` or `incorrect` |
+| `user_rating` | int64 | Quality score 0–5 |
+| `corrected_msa` | string | Human correction — required if incorrect or rating ≤ 2 |
+| `timestamp` | string | ISO 8601 UTC timestamp |
+
+🔗 [huggingface.co/datasets/AdhamAshraf/slanggpt-feedback-dataset](https://huggingface.co/datasets/AdhamAshraf/slanggpt-feedback-dataset)
+
+```python
+from datasets import load_dataset
+df = load_dataset("AdhamAshraf/slanggpt-feedback-dataset", split="train").to_pandas()
+
+# High quality confirmed translations
+high_quality = df[df["user_rating"] >= 4]
+
+# Human corrections for fine-tuning
+corrections = df[df["corrected_msa"] != ""]
+
+# Group multiple corrections per sentence
+mapping = (
+    corrections
+    .groupby("egyptian_arabic")["corrected_msa"]
+    .apply(list)
+    .reset_index()
+)
+```
+
+---
+
+## Live Demo
+
+Try SlangGPT directly on Hugging Face Spaces — no setup required:
+
+🔗 [huggingface.co/spaces/AdhamAshraf/SlangGPT](https://huggingface.co/spaces/AdhamAshraf/SlangGPT)
+
+Enter an Egyptian Arabic sentence and get the MSA translation instantly. After each translation, you can rate the output and provide a correction — your feedback goes directly into the feedback dataset and will be used to retrain the model.
 
 ---
 
@@ -167,8 +210,6 @@ pip install -r requirements.txt
 
 ### 3. Download model weights
 
-Weights are hosted on Google Drive (~1.9 GB total). Run:
-
 ```bash
 python scripts/download_weights.py
 ```
@@ -176,11 +217,9 @@ python scripts/download_weights.py
 This downloads and places weights at:
 
 ```
-model/weights/detection/best_model.pt           (~527 MB)
+model/weights/detection/best_model.pt            (~527 MB)
 model/weights/generation/best/model.safetensors  (~1.37 GB)
 ```
-
-> ⚠️ If the download script fails, get the weights directly from the Google Drive link in `scripts/download_weights.py`.
 
 ### 4. Download and preprocess the dataset
 
@@ -190,8 +229,6 @@ dataset = load_dataset("AdhamAshraf/egyptian-2-arabic", split="train")
 df = dataset.to_pandas()
 df.to_csv("data/raw/NLP.csv", index=False, encoding="utf-8-sig")
 ```
-
-Then run the preprocessing pipeline:
 
 ```bash
 python data/prepare_data.py --raw_csv data/raw/NLP.csv
@@ -203,7 +240,7 @@ python data/prepare_data.py --raw_csv data/raw/NLP.csv
 python app/app.py
 ```
 
-Open `http://localhost:5000` — enter an Egyptian Arabic sentence to get the MSA translation and a detection confidence score.
+Open `http://localhost:5000`
 
 ---
 
@@ -217,8 +254,6 @@ Training was done on Google Colab (T4 GPU). Open the notebooks in order:
 | `02_train_generation.ipynb` | Fine-tune AraGPT-2 medium for generation |
 | `03_train_detection.ipynb` | Fine-tune AraGPT-2 base for detection |
 
-All notebooks mount Google Drive and save checkpoints automatically.
-
 ### Hyperparameters
 
 | | Generation | Detection |
@@ -230,7 +265,7 @@ All notebooks mount Google Drive and save checkpoints automatically.
 | LR schedule | Cosine | Linear |
 | Warmup ratio | 10% | 10% |
 | Weight decay | 0.01 | 0.01 |
-| Epochs (actual) | 5 (early stop at 5, best at ep. 3) | 8 |
+| Epochs | 5 (best at ep. 3) | 8 |
 | Train loss (start → end) | 2.50 → 0.76 | 0.71 → 0.10 |
 
 ---
@@ -248,8 +283,6 @@ python evaluation/evaluate.py
 python evaluation/error_analysis.py
 ```
 
-Results are saved to `evaluation/plots/`.
-
 ### Detection Error Breakdown (Test Set)
 
 | | Count | Rate |
@@ -258,8 +291,6 @@ Results are saved to `evaluation/plots/`.
 | Correct predictions | 3,491 | 95.6% |
 | False Positives | 101 | 2.8% |
 | False Negatives | 58 | 1.6% |
-
-The model is more prone to false positives — accepting an incorrect translation as correct — than false negatives. This occurs mainly on short or ambiguous Egyptian inputs where the mismatched MSA sentence is semantically plausible in isolation.
 
 ---
 
@@ -270,7 +301,7 @@ The model is more prone to false positives — accepting an incorrect translatio
 | Generation | AraGPT-2 Medium | [aubmindlab/aragpt2-medium](https://huggingface.co/aubmindlab/aragpt2-medium) |
 | Detection | AraGPT-2 Base | [aubmindlab/aragpt2-base](https://huggingface.co/aubmindlab/aragpt2-base) |
 
-**Generation** uses causal language modeling with prompt masking — only the MSA target tokens contribute to the training loss. Inference uses nucleus sampling (temperature=0.7, top-k=50, top-p=0.92, repetition penalty=1.3).
+**Generation** uses causal language modeling with prompt masking — only the MSA target tokens contribute to the training loss. Inference uses greedy decoding with repetition penalty for consistent, deterministic output.
 
 **Detection** encodes a cloze-style Arabic prompt through AraGPT-2 and passes the last-token hidden state through a linear classifier head trained with binary cross-entropy.
 
@@ -307,6 +338,19 @@ Which builds on:
 - Antoun et al., [AraGPT2](https://arxiv.org/abs/2012.15520), 2021
 - Sun et al., [Toward Informal Language Processing](https://arxiv.org/abs/2404.02323), 2024
 - Radford et al., [GPT-2](https://openai.com/research/language-unsupervised), 2019
+
+---
+
+## Citation
+
+```bibtex
+@misc{slanggpt2026,
+  title={SlangGPT: Fine-tuning AraGPT-2 for Egyptian Arabic to MSA Generation and Detection},
+  author={Abdelrahman Ahmed and Adham Ashraf and Ahmed Fekry},
+  year={2026},
+  url={https://github.com/adhamashraf7788/SlangGPT}
+}
+```
 
 ---
 
