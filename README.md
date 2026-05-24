@@ -350,6 +350,14 @@ Which builds on:
   year={2026},
   url={https://github.com/adhamashraf7788/SlangGPT}
 }
+
+@dataset{egyptian_english_original,
+  author    = {Abdalrahmankamel},
+  title     = {Egyption\_2\_English},
+  year      = {2024},
+  publisher = {Hugging Face},
+  url       = {https://huggingface.co/datasets/Abdalrahmankamel/Egyption_2_English}
+}
 ```
 
 ---
